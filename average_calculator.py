@@ -27,37 +27,65 @@ def calculate_average(grouped_data):
     # Calculate and return the mean for each period group
     return {period: statistics.mean(amounts) for period, amounts in grouped_data.items()}
 
-def calculate_period_average(period_type):
-    """Generic function to calculate averages for a given period."""
-    full_date_string = '%Y-%m-%d %H:%M:%S'
-    day_string = '%Y-%m-%d'
-    month_string = '%Y-%m'
+@app.route('/average/daily', methods=['POST'])
+def calculate_daily_average():
+    """Calculates the daily average of the provided data."""
     data = request.get_json()
-    print(f"Received data for {period_type} average calculation: {data}")
+    print(f"Received data for daily average calculation: {data}")
     if not data or 'data' not in data:
         return jsonify({'error': 'Data is missing'}), 400
-
     try:
-        period_funcs = {
-            'daily': lambda date: date.strftime(day_string),
-            'weekly': lambda date: (date - timedelta(days=date.weekday())).strftime(day_string),
-            'monthly': lambda date: date.strftime(month_string)
-        }
-        entries = [{'date': datetime.strptime(entry['date'], full_date_string), 'amount': entry['amount']} for entry in data['data']]
-        period_data = group_by_period(entries, period_funcs[period_type])
-        period_average = calculate_average(period_data)
-        print(f"Calculated {period_type} averages: {period_average}")
-        return jsonify({'average': period_average}), 200
+        # Parse the dates and amounts from the input data
+        entries = [{'date': datetime.strptime(entry['date'], '%Y-%m-%d %H:%M:%S'), 'amount': entry['amount']} for entry in data['data']]
+        # Group the data by day
+        daily_data = group_by_period(entries, lambda date: date.strftime('%Y-%m-%d'))
+        # Calculate the average for each day
+        daily_average = calculate_average(daily_data)
+        print(f"Calculated daily averages: {daily_average}")
+        return jsonify({'average': daily_average}), 200
     except (TypeError, ValueError) as e:
         print(f"Error processing data: {e}")
         return jsonify({'error': 'Invalid data provided'}), 400
 
-@app.route('/average/<period_type>', methods=['POST'])
-def calculate_average_for_period(period_type):
-    accepted_period_types = ['daily', 'weekly', 'monthly']
-    if period_type not in accepted_period_types:
-        return jsonify({'error': 'Invalid period type'}), 400
-    return calculate_period_average(period_type)
+@app.route('/average/weekly', methods=['POST'])
+def calculate_weekly_average():
+    """Calculates the weekly average of the provided data."""
+    data = request.get_json()
+    print(f"Received data for weekly average calculation: {data}")
+    if not data or 'data' not in data:
+        return jsonify({'error': 'Data is missing'}), 400
+    try:
+        # Parse the dates and amounts from the input data
+        entries = [{'date': datetime.strptime(entry['date'], '%Y-%m-%d %H:%M:%S'), 'amount': entry['amount']} for entry in data['data']]
+        # Group the data by week (starting from Monday)
+        weekly_data = group_by_period(entries, lambda date: (date - timedelta(days=date.weekday())).strftime('%Y-%m-%d'))
+        # Calculate the average for each week
+        weekly_average = calculate_average(weekly_data)
+        print(f"Calculated weekly averages: {weekly_average}")
+        return jsonify({'average': weekly_average}), 200
+    except (TypeError, ValueError) as e:
+        print(f"Error processing data: {e}")
+        return jsonify({'error': 'Invalid data provided'}), 400
+
+@app.route('/average/monthly', methods=['POST'])
+def calculate_monthly_average():
+    """Calculates the monthly average of the provided data."""
+    data = request.get_json()
+    print(f"Received data for monthly average calculation: {data}")
+    if not data or 'data' not in data:
+        return jsonify({'error': 'Data is missing'}), 400
+    try:
+        # Parse the dates and amounts from the input data
+        entries = [{'date': datetime.strptime(entry['date'], '%Y-%m-%d %H:%M:%S'), 'amount': entry['amount']} for entry in data['data']]
+        # Group the data by month
+        monthly_data = group_by_period(entries, lambda date: date.strftime('%Y-%m'))
+        # Calculate the average for each month
+        monthly_average = calculate_average(monthly_data)
+        print(f"Calculated monthly averages: {monthly_average}")
+        return jsonify({'average': monthly_average}), 200
+    except (TypeError, ValueError) as e:
+        print(f"Error processing data: {e}")
+        return jsonify({'error': 'Invalid data provided'}), 400
 
 if __name__ == '__main__':
     # Run the Flask application in debug mode
