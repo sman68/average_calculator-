@@ -54,6 +54,10 @@ def calculate_average_for_period(period_type):
         return jsonify({'error': 'Invalid period type'}), 400
     return calculate_period_average(period_type)
 
+@app.route('/', methods=['GET'])
+def index():
+    return 'Connection established.', 200
+
 if __name__ == '__main__':
     # Run the Flask application in debug mode
     app.run(debug=True)
