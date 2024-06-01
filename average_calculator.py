@@ -6,20 +6,25 @@ app = Flask(__name__)
 
 def parse_data(data):
     """Parses the input data and returns a list of values."""
+    # Extract and return the 'amount' field from each entry in the data
     return [entry['amount'] for entry in data]
 
 def group_by_period(data, period_func):
     """Groups data by a specified period (e.g., daily, weekly, monthly)."""
     grouped_data = {}
     for entry in data:
+        # Determine the period for the current entry using the provided period function
         period = period_func(entry['date'])
+        # Initialize the period key if not already present
         if period not in grouped_data:
             grouped_data[period] = []
+        # Append the entry's amount to the corresponding period group
         grouped_data[period].append(entry['amount'])
     return grouped_data
 
 def calculate_average(grouped_data):
     """Calculates the average for each group of data."""
+    # Calculate and return the mean for each period group
     return {period: statistics.mean(amounts) for period, amounts in grouped_data.items()}
 
 def calculate_period_average(period_type):
@@ -55,5 +60,5 @@ def calculate_average_for_period(period_type):
     return calculate_period_average(period_type)
 
 if __name__ == '__main__':
-    # Run the Flask application in debug mode
-    app.run(debug=True)
+    # Run the Flask application in debug mode on port 5004
+    app.run(debug=True, port=5004)
