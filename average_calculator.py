@@ -60,5 +60,5 @@ def calculate_average_for_period(period_type):
     return calculate_period_average(period_type)
 
 if __name__ == '__main__':
-    # Run the Flask application in debug mode on port 5004
+    # Run the Flask application in debug mode
     app.run(debug=True, port=5004)
